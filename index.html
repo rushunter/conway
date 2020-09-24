@@ -28,7 +28,7 @@
             const cols = Math.floor(SCREEN_WIDTH/size);
             const rows = Math.floor(SCREEN_HEIGHT/size);
 
-            const wrap = false;
+            let wrap = false;
             let nextGen = false;
 
             const survive = [2, 3];
@@ -36,13 +36,22 @@
 
             const field = new Array(cols);
             const blocks = [];
+            let gameLoop = null;
 
             function create() {
 
                 randomize();
 
+                const loopConfig = { 
+                    loop: true, 
+                    delay: 120,
+                    callbackScope: this, 
+                    callback: draw 
+                };
+                gameLoop = this.time.addEvent(loopConfig);
+
                 this.input.keyboard.on('keyup', e => {
-                    if (e.keyCode == Key.SPACE) {
+                    if (e.keyCode === Key.SPACE) {
                         for (let x = 0; x < cols; x++) {
                             for (let y = 0; y < rows; y++) {
                                 if (field[x][y] === 0 && Math.random() <= 0.1) {
@@ -50,12 +59,19 @@
                                 }
                             }
                         }
-                    } else if (e.keyCode == Key.R) {
-                        randomize();
+                    } else if (e.keyCode === Key.R) {
+                        randomize();0
+
+                    } else if (e.keyCode === Key.W) {
+                        wrap = !wrap;
+
+                    } else if (e.keyCode === 61 || e.keyCode === 107) {    // +
+                        gameLoop.reset({ ...loopConfig, delay: Math.max(gameLoop.delay-20, 60) });
+
+                    } else if (e.keyCode === 173 || e.keyCode === 109) {   // -
+                        gameLoop.reset({ ...loopConfig, delay: Math.min(gameLoop.delay+20, 200) });
                     }
                 });
-
-                this.time.addEvent({ loop: true, delay: 120, callbackScope: this, callback: draw });
             }
 
             function randomize() {
